@@ -4,6 +4,7 @@ import com.mrivanplays.conversations.base.ConversationContext.EndState;
 import io.papermc.paper.event.player.AsyncChatEvent;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerQuitEvent;
 
@@ -15,7 +16,7 @@ class PaperConvoListener implements Listener {
     this.convoManager = convoManager;
   }
 
-  @EventHandler
+  @EventHandler(priority = EventPriority.LOWEST)
   public void onChat(AsyncChatEvent event) {
     Player player = event.getPlayer();
     if (!convoManager.hasActiveConversation(player.getUniqueId())) {
@@ -25,7 +26,7 @@ class PaperConvoListener implements Listener {
     convoManager.acceptInput(player.getUniqueId(), event.message());
   }
 
-  @EventHandler
+  @EventHandler(priority = EventPriority.LOWEST)
   public void onQuit(PlayerQuitEvent event) {
     convoManager.removePartner(event.getPlayer().getUniqueId());
     convoManager.unregisterConversation(
