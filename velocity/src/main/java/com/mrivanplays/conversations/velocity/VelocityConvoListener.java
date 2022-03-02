@@ -1,6 +1,7 @@
 package com.mrivanplays.conversations.velocity;
 
 import com.mrivanplays.conversations.base.ConversationContext.EndState;
+import com.velocitypowered.api.event.PostOrder;
 import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.event.connection.DisconnectEvent;
 import com.velocitypowered.api.event.player.PlayerChatEvent;
@@ -16,7 +17,7 @@ class VelocityConvoListener {
     this.convoManager = convoManager;
   }
 
-  @Subscribe
+  @Subscribe(order = PostOrder.FIRST)
   public void onChat(PlayerChatEvent event) {
     Player player = event.getPlayer();
     if (!convoManager.hasActiveConversation(player.getUniqueId())) {
@@ -28,7 +29,7 @@ class VelocityConvoListener {
         LegacyComponentSerializer.legacyAmpersand().deserialize(event.getMessage()));
   }
 
-  @Subscribe
+  @Subscribe(order = PostOrder.FIRST)
   public void onDisconnect(DisconnectEvent event) {
     convoManager.removePartner(event.getPlayer().getUniqueId());
     convoManager.unregisterConversation(
