@@ -11,6 +11,8 @@
     <module>base</module>
     <module>spigot</module>
     <module>paper</module>
+    <module>bungee</module>
+    <module>velocity</module>
   </modules>
   <packaging>pom</packaging>
 

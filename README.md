@@ -17,12 +17,14 @@ question. I wanted something more like how Mojang went with brigadier. And this 
 
 # OOB Supported platforms
 
-| Platform                        | Artifact ID            | Message type                               | Sender Type                                  |
-|---------------------------------|------------------------|--------------------------------------------|----------------------------------------------|
-| Bukkit                          | `conversations-spigot` | `String`                                   | `Player` wrapped `BukkitConversationPartner` |
-| Spigot                          | `conversations-spigot` | `net.md_5.bungee.api.chat.BaseComponent[]` | `Player` wrapped `SpigotConversationPartner` |
-| Paper                           | `conversations-paper`  | `net.kyori.adventure.text.Component`       | `Player` wrapped `PaperConversationPartner`  |
-| Whichever you want to implement | `conversations-base`   | Whatever you want                          | Whatever you want                            |
+| Platform                        | Artifact ID              | Message type                               | Sender Type                                         |
+|---------------------------------|--------------------------|--------------------------------------------|-----------------------------------------------------|
+| Bukkit                          | `conversations-spigot`   | `String`                                   | `Player` wrapped `BukkitConversationPartner`        |
+| Spigot                          | `conversations-spigot`   | `net.md_5.bungee.api.chat.BaseComponent[]` | `Player` wrapped `SpigotConversationPartner`        |
+| Paper                           | `conversations-paper`    | `net.kyori.adventure.text.Component`       | `Player` wrapped `PaperConversationPartner`         |
+| BungeeCord                      | `conversations-bungee`   | `net.md_5.bungee.api.chat.BaseComponent[]` | `ProxiedPlayer` wrapped `BungeeConversationPartner` |
+| Velocity                        | `conversations-velocity` | `net.kyori.adventure.text.Component`       | `Player` wrapped `VelocityConversationPartner`      |
+| Whichever you want to implement | `conversations-base`     | Whatever you want                          | Whatever you want                                   |
 
 ## How To (Maven)
 
