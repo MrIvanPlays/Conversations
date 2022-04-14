@@ -19,7 +19,7 @@ public interface TimeoutScheduler {
    * @return timeout task
    * @see TimeoutTask
    */
-  TimeoutTask schedule(Runnable task, int time, TimeUnit timeUnit);
+  TimeoutTask schedule(Runnable task, long time, TimeUnit timeUnit);
 
   /**
    * (Optional to implement) Shuts down any executor if needed. Shall be called whenever the program

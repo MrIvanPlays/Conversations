@@ -19,11 +19,15 @@ public class ExecutorServiceTimeoutScheduler implements TimeoutScheduler {
     service = Executors.newScheduledThreadPool(3);
   }
 
+  public ExecutorServiceTimeoutScheduler(ScheduledExecutorService service) {
+    this.service = service;
+  }
+
   /**
    * {@inheritDoc}
    */
   @Override
-  public TimeoutTask schedule(Runnable task, int time, TimeUnit timeUnit) {
+  public TimeoutTask schedule(Runnable task, long time, TimeUnit timeUnit) {
     return new ExecutorServiceTimeoutTask(service.schedule(task, time, timeUnit));
   }
 

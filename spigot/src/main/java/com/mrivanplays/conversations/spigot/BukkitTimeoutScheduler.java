@@ -22,7 +22,7 @@ public class BukkitTimeoutScheduler implements TimeoutScheduler {
    * {@inheritDoc}
    */
   @Override
-  public TimeoutTask schedule(Runnable task, int time, TimeUnit timeUnit) {
+  public TimeoutTask schedule(Runnable task, long time, TimeUnit timeUnit) {
     return new BukkitTimeoutTask(
         plugin
             .getServer()
