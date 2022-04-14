@@ -55,7 +55,7 @@ public final class Question<MessageType, SenderType extends ConversationPartner<
 
   private final String identifier;
   private final MessageType message;
-  private int timeout;
+  private long timeout;
   private TimeUnit timeoutUnit;
   private Consumer<SenderType> whenTimeout;
   private InputValidator<MessageType> inputValidator;
@@ -92,7 +92,7 @@ public final class Question<MessageType, SenderType extends ConversationPartner<
    *
    * @return timeout or -1
    */
-  public int getTimeout() {
+  public long getTimeout() {
     return timeout;
   }
 
@@ -135,7 +135,7 @@ public final class Question<MessageType, SenderType extends ConversationPartner<
 
     private String identifier;
     private MessageType message;
-    private int timeout = -1;
+    private long timeout = -1;
     private TimeUnit timeoutUnit;
     private Consumer<SenderType> whenTimeout;
     private InputValidator<MessageType> inputValidator;
@@ -171,7 +171,7 @@ public final class Question<MessageType, SenderType extends ConversationPartner<
      * @param timeUnit timeout unit
      * @return this instance for chaining
      */
-    public Builder<MessageType, SenderType> withTimeout(int timeout, TimeUnit timeUnit) {
+    public Builder<MessageType, SenderType> withTimeout(long timeout, TimeUnit timeUnit) {
       this.timeout = timeout;
       this.timeoutUnit = timeUnit;
       return this;
