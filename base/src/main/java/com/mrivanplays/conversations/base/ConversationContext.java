@@ -102,6 +102,10 @@ public final class ConversationContext<
     TIMEOUT,
     /** Indicates that the conversation partner has disconnected. */
     PARTNER_DISCONNECT,
+    /**
+     * Indicates that a question's input validator has failed and had the instruction to call end.
+     */
+    INPUT_VALIDATION_HANDLER_FAIL,
     /** Indicates that the conversation was ended by an unknown reason. */
     UNKNOWN
   }

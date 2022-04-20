@@ -58,16 +58,37 @@ public interface InputValidator<MessageType> {
       return new ValidationResult<>(message, askQuestionAgain);
     }
 
+    /**
+     * Returns a failure result with the specified message.
+     *
+     * @param message the error message
+     * @param askQuestionAgain whether to send the question to the conversation partner again
+     * @param callDoneState whether to call done state
+     * @param <MessageType> message type generic
+     * @return validation result
+     */
+    public static <MessageType> ValidationResult<MessageType> fail(
+        MessageType message, boolean askQuestionAgain, boolean callDoneState
+    ) {
+      return new ValidationResult<>(message, askQuestionAgain, callDoneState);
+    }
+
     private final MessageType errorMessage;
     private final boolean askQuestionAgain;
+    private final boolean callDoneState;
 
     private ValidationResult(MessageType errorMessage) {
       this(errorMessage, false);
     }
 
     private ValidationResult(MessageType errorMessage, boolean askQuestionAgain) {
+      this(errorMessage, askQuestionAgain, false);
+    }
+
+    private ValidationResult(MessageType errorMessage, boolean askQuestionAgain, boolean callDoneState) {
       this.errorMessage = errorMessage;
       this.askQuestionAgain = askQuestionAgain;
+      this.callDoneState = callDoneState;
     }
 
     /**
@@ -76,7 +97,7 @@ public interface InputValidator<MessageType> {
      * @return success or not
      */
     public boolean isSuccessful() {
-      return errorMessage == null && !askQuestionAgain;
+      return errorMessage == null && !askQuestionAgain && !callDoneState;
     }
 
     /**
@@ -86,6 +107,15 @@ public interface InputValidator<MessageType> {
      */
     public boolean shallAskQuestionAgain() {
       return askQuestionAgain;
+    }
+
+    /**
+     * Returns whether we shall call the conversation done.
+     *
+     * @return whether to call done
+     */
+    public boolean shallCallDoneState() {
+      return callDoneState;
     }
 
     /**

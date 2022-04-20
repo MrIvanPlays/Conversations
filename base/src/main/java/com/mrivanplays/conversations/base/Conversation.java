@@ -119,6 +119,15 @@ public final class Conversation<MessageType, SenderType extends ConversationPart
         conversationPartner.sendMessage(validationResult.getErrorMessage());
         if (validationResult.shallAskQuestionAgain()) {
           conversationPartner.sendMessage(question.getMessage());
+        } else if (validationResult.shallCallDoneState()) {
+          ended = true;
+          conversationManager.unregisterConversation(conversationPartner.getUniqueIdentifier());
+          doneHandler.accept(
+              ConversationContext.of(
+                  conversationPartner,
+                  inputs,
+                  EndState.INPUT_VALIDATION_HANDLER_FAIL,
+                  question.getIdentifier()));
         }
         return;
       }
