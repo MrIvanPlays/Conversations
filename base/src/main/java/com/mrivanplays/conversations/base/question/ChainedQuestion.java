@@ -42,15 +42,15 @@ public final class ChainedQuestion<
       MessageType, SenderType extends ConversationPartner<MessageType>> {
 
     private final Question<MessageType, SenderType> previousQuestion;
-    private final MessageType message;
+    private final MessageType messageInput;
     private final SenderType sender;
 
     public ComputeContext(
         Question<MessageType, SenderType> previousQuestion,
-        MessageType message,
+        MessageType messageInput,
         SenderType sender) {
       this.previousQuestion = Objects.requireNonNull(previousQuestion, "previousQuestion");
-      this.message = Objects.requireNonNull(message, "message");
+      this.messageInput = Objects.requireNonNull(messageInput, "messageInput");
       this.sender = Objects.requireNonNull(sender, "sender");
     }
 
@@ -58,8 +58,8 @@ public final class ChainedQuestion<
       return this.previousQuestion;
     }
 
-    public MessageType getMessage() {
-      return this.message;
+    public MessageType getInputMessage() {
+      return this.messageInput;
     }
 
     public SenderType getSender() {
