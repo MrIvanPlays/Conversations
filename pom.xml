@@ -6,7 +6,7 @@
 
   <groupId>com.mrivanplays</groupId>
   <artifactId>conversations-parent</artifactId>
-  <version>0.0.1-SNAPSHOT</version>
+  <version>0.0.2-SNAPSHOT</version>
   <modules>
     <module>base</module>
     <module>spigot</module>
@@ -58,7 +58,7 @@
     <maven.compiler.source>1.8</maven.compiler.source>
     <maven.compiler.target>1.8</maven.compiler.target>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <junit.version>5.8.2</junit.version>
+    <junit.version>5.9.1</junit.version>
   </properties>
 
   <dependencies>
@@ -101,7 +101,7 @@
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-compiler-plugin</artifactId>
-            <version>3.8.1</version>
+            <version>3.10.1</version>
             <configuration>
               <showDeprecation>false</showDeprecation>
               <showWarnings>false</showWarnings>
@@ -115,8 +115,8 @@
             <artifactId>maven-surefire-plugin</artifactId>
             <version>2.22.2</version>
             <configuration>
-              <reuseForks>false</reuseForks>
-              <forkCount>1</forkCount>
+              <parallel>all</parallel>
+              <useUnlimitedThreads>true</useUnlimitedThreads>
             </configuration>
             <dependencies>
               <dependency>
@@ -142,7 +142,7 @@
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-javadoc-plugin</artifactId>
-            <version>3.3.1</version>
+            <version>3.4.1</version>
             <configuration>
               <quiet>true</quiet>
               <detectOfflineLinks>false</detectOfflineLinks>
