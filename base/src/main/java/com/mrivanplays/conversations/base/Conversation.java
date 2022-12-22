@@ -1,13 +1,13 @@
 package com.mrivanplays.conversations.base;
 
 import com.mrivanplays.conversations.base.ConversationContext.EndState;
+import com.mrivanplays.conversations.base.question.ChainedQuestion;
+import com.mrivanplays.conversations.base.question.ChainedQuestion.ComputeContext;
 import com.mrivanplays.conversations.base.question.InputValidator;
 import com.mrivanplays.conversations.base.question.Question;
 import com.mrivanplays.conversations.base.timeout.TimeoutScheduler;
 import com.mrivanplays.conversations.base.timeout.TimeoutTask;
 import java.util.LinkedHashMap;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.function.Consumer;
@@ -46,14 +46,14 @@ public final class Conversation<MessageType, SenderType extends ConversationPart
   private final ConversationManager<MessageType, SenderType> conversationManager;
   private final SenderType conversationPartner;
   private final TimeoutScheduler timeoutScheduler;
-  private final List<Question<MessageType, SenderType>> questions;
+  private final ChainedQuestion<MessageType, SenderType> questions;
   private final Consumer<ConversationContext<MessageType, SenderType>> doneHandler;
   private final Map<String, MessageType> inputs = new LinkedHashMap<>();
 
   private boolean ended = false;
 
-  private int currentQuestionIndex;
   private TimeoutTask lastTimeoutTask;
+  private Question<MessageType, SenderType> lastQuestion;
 
   private Conversation(Builder<MessageType, SenderType> builder) {
     conversationManager =
@@ -61,19 +61,15 @@ public final class Conversation<MessageType, SenderType extends ConversationPart
     conversationPartner =
         Objects.requireNonNull(builder.conversationPartner, "conversationPartner");
     doneHandler = Objects.requireNonNull(builder.doneHandler, "doneHandler");
-    List<Question<MessageType, SenderType>> builderQuestions = builder.questions;
-    if (builderQuestions.isEmpty()) {
-      throw new IllegalArgumentException("No questions specified");
-    }
-    this.questions = builderQuestions;
+    this.questions = Objects.requireNonNull(builder.questions, "No questions specified");
     this.timeoutScheduler = builder.timeoutScheduler;
   }
 
   /** Starts the conversation by sending the first question. */
   public void start() {
-    currentQuestionIndex = 0;
+    this.lastQuestion = this.questions.getFirstQuestion();
     conversationManager.registerConversation(this);
-    handleQuestion(questions.get(currentQuestionIndex));
+    handleQuestion(this.questions.getFirstQuestion());
   }
 
   /**
@@ -111,14 +107,13 @@ public final class Conversation<MessageType, SenderType extends ConversationPart
     if (ended) {
       return;
     }
-    Question<MessageType, SenderType> question = questions.get(currentQuestionIndex);
-    if (question.getInputValidator() != null) {
+    if (this.lastQuestion.getInputValidator() != null) {
       InputValidator.ValidationResult<MessageType> validationResult =
-          question.getInputValidator().validate(message);
+          this.lastQuestion.getInputValidator().validate(message);
       if (!validationResult.isSuccessful()) {
         conversationPartner.sendMessage(validationResult.getErrorMessage());
         if (validationResult.shallAskQuestionAgain()) {
-          conversationPartner.sendMessage(question.getMessage());
+          conversationPartner.sendMessage(this.lastQuestion.getMessage());
         } else if (validationResult.shallCallDoneState()) {
           ended = true;
           conversationManager.unregisterConversation(conversationPartner.getUniqueIdentifier());
@@ -127,20 +122,23 @@ public final class Conversation<MessageType, SenderType extends ConversationPart
                   conversationPartner,
                   inputs,
                   EndState.INPUT_VALIDATION_HANDLER_FAIL,
-                  question.getIdentifier()));
+                  this.lastQuestion.getIdentifier()));
         }
         return;
       }
     }
-    inputs.put(question.getIdentifier(), message);
-    if ((currentQuestionIndex + 1) == questions.size()) {
+    inputs.put(this.lastQuestion.getIdentifier(), message);
+    Question<MessageType, SenderType> nextQuestion =
+        this.questions.getNextQuestion(
+            new ComputeContext<>(this.lastQuestion, message, this.conversationPartner));
+    if (nextQuestion == null) {
       ended = true;
       conversationManager.unregisterConversation(conversationPartner.getUniqueIdentifier());
       doneHandler.accept(
           ConversationContext.of(conversationPartner, inputs, EndState.SUCCESS, null));
     } else {
-      currentQuestionIndex++;
-      handleQuestion(questions.get(currentQuestionIndex));
+      this.lastQuestion = nextQuestion;
+      handleQuestion(nextQuestion);
     }
   }
 
@@ -167,9 +165,9 @@ public final class Conversation<MessageType, SenderType extends ConversationPart
       return;
     }
     ended = true;
-    Question<MessageType, SenderType> question = questions.get(currentQuestionIndex);
     doneHandler.accept(
-        ConversationContext.of(conversationPartner, inputs, endState, question.getIdentifier()));
+        ConversationContext.of(
+            conversationPartner, inputs, endState, this.lastQuestion.getIdentifier()));
   }
 
   /**
@@ -184,7 +182,8 @@ public final class Conversation<MessageType, SenderType extends ConversationPart
     private ConversationManager<MessageType, SenderType> conversationManager;
     private TimeoutScheduler timeoutScheduler;
     private Consumer<ConversationContext<MessageType, SenderType>> doneHandler;
-    private List<Question<MessageType, SenderType>> questions = new LinkedList<>();
+    private ChainedQuestion<MessageType, SenderType> questions;
+    private boolean chainedCalled = false;
 
     private Builder() {}
 
@@ -239,14 +238,46 @@ public final class Conversation<MessageType, SenderType extends ConversationPart
     }
 
     /**
+     * Specify a {@link ChainedQuestion} to be sent to the conversation partner.
+     *
+     * @param val
+     * @return
+     * @see Question
+     * @see ChainedQuestion
+     * @throws IllegalArgumentException if {@link #withQuestion(Question)} has already been called.
+     *     Chained and non-chained questions are not supported and both cannot work simultaneously.
+     */
+    public Builder<MessageType, SenderType> chainedQuestions(
+        ChainedQuestion<MessageType, SenderType> val) {
+      if (this.questions != null) {
+        throw new IllegalArgumentException(
+            "Questions cannot be chained since withQuestion has already been called. Either choose chained or non-chained questions.");
+      }
+      this.questions = val;
+      this.chainedCalled = true;
+      return this;
+    }
+
+    /**
      * Specify a {@link Question} to be sent to the conversation partner.
      *
      * @param val question
      * @return this instance for chaining
      * @see Question
+     * @throws IllegalArgumentException if {@link #chainedQuestions(ChainedQuestion)} has already
+     *     been called. Chained and non-chained questions are not supported and both cannot work
+     *     simultaneously.
      */
     public Builder<MessageType, SenderType> withQuestion(Question<MessageType, SenderType> val) {
-      questions.add(val);
+      if (questions == null) {
+        questions = new ChainedQuestion<>(val);
+      } else {
+        if (chainedCalled) {
+          throw new IllegalArgumentException(
+              "Questions are chained. withQuestion does not work when chainedQuestions is already been called");
+        }
+        questions.addQuestion(($) -> val);
+      }
       return this;
     }
 
