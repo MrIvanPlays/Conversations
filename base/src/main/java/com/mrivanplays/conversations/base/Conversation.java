@@ -240,8 +240,8 @@ public final class Conversation<MessageType, SenderType extends ConversationPart
     /**
      * Specify a {@link ChainedQuestion} to be sent to the conversation partner.
      *
-     * @param val
-     * @return
+     * @param val chained question object
+     * @return this instance for chaining
      * @see Question
      * @see ChainedQuestion
      * @throws IllegalArgumentException if {@link #withQuestion(Question)} has already been called.
